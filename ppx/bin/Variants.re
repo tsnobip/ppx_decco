@@ -4,6 +4,32 @@ open Ppx_tools_402;
 open Parsetree;
 open Ast_helper;
 open Utils;
+open Longident;
+
+let rec isIdentifierUsedInCoreType = (typeName, {ptyp_desc}) =>
+    switch ptyp_desc {
+        | Ptyp_var(_) => failwith("Ptyp_var")
+        | Ptyp_any => failwith("Ptyp_any")
+        | Ptyp_arrow(_, _, _) => failwith("Ptyp_arrow")
+        | Ptyp_tuple(_) => failwith("Ptyp_tuple")
+        | Ptyp_constr({txt}, childTypes) =>
+            txt == Lident(typeName)
+                ? true
+                : List.exists(isIdentifierUsedInCoreType(typeName), childTypes)
+        | Ptyp_variant(_, _, _) => failwith("Ptyp_variant")
+        | Ptyp_object(_, _) => failwith("Ptyp_object")
+        | Ptyp_class(_, _) => failwith("Ptyp_class")
+        | Ptyp_alias(_, _) => failwith("Ptyp_alias")
+        | Ptyp_poly(_, _) => failwith("Ptyp_poly")
+        | Ptyp_package(_) => failwith("Ptyp_package")
+        | Ptyp_extension(_) => failwith("Ptyp_extension")
+    };
+
+let isRecursive = (typeName, decls) =>
+    decls
+    |> List.exists(({pcd_args}) =>
+        List.exists(isIdentifierUsedInCoreType(typeName), pcd_args)
+    );
 
 let generateEncoderCase = (generatorSettings, { pcd_name: { txt: name }, pcd_args, pcd_loc }) => {
     let lhsVars = switch pcd_args {

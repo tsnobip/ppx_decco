@@ -1,5 +1,6 @@
 open Jest;
 open Expect;
+open TestUtils;
 /* open Decco; /* Don't open these in order to validate ppx works without it */
 open Belt.Result; */
 
@@ -70,22 +71,6 @@ module DecOnly : DecOnly = {
     [@decco.decode] type t = int;
     t_encode + 1;
 };
-
-let testBadDecode = (name, decode, json, expectedError) =>
-    test(name, () => {
-        switch (decode(json)) {
-            | Belt.Result.Error(e) => expect(e) |> toEqual(expectedError)
-            | _ => failwith("Decode erroneously succeeded")
-        };
-    });
-
-let testGoodDecode = (name, decode, json, expected) =>
-    test(name, () =>
-        switch (decode(json)) {
-            | Belt.Result.Ok(actual) => expect(actual) |> toEqual(expected)
-            | Belt.Result.Error({ Decco.path, message }) => failwith({j|Decode error: $message ($path)|j})
-        }
-    );
 
 describe("string", () => {
     test("s_encode", () => {
@@ -380,13 +365,7 @@ describe("result", () => {
     let dec = r_decode(s_decode, i_decode);
 
     describe("r_encode", () => {
-        test("ok", () =>
-            Belt.Result.Ok("oaky")
-            |> enc
-            |> Js.Json.stringify
-            |> expect
-            |> toBe("[\"Ok\",\"oaky\"]")
-        );
+        testEncode("ok", Belt.Result.Ok("oaky"), enc, "[\"Ok\",\"oaky\"]");
 
         test("error", () => {
             Belt.Result.Error(404)
@@ -516,7 +495,7 @@ describe("optionList", () => {
         let v = [ Some("a"), None, Some("b") ];
         let json = optionList_encode(v);
         expect(Js.Json.stringify(json))
-            |> toBe({|["a",null,"b"]|})
+        |> toBe({|["a",null,"b"]|})
     });
 
     describe("optionList_decode", () => {
