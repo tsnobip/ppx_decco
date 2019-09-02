@@ -6,23 +6,20 @@ open Ast_helper;
 open Utils;
 open Longident;
 
-let rec isIdentifierUsedInCoreType = (typeName, {ptyp_desc}) =>
+let rec isIdentifierUsedInCoreType = (typeName, {ptyp_desc, ptyp_loc}) =>
     switch ptyp_desc {
-        | Ptyp_var(_) => failwith("Ptyp_var")
-        | Ptyp_any => failwith("Ptyp_any")
-        | Ptyp_arrow(_, _, _) => failwith("Ptyp_arrow")
-        | Ptyp_tuple(_) => failwith("Ptyp_tuple")
+        | Ptyp_arrow(_, _, _) => fail(ptyp_loc, "Can't generate codecs for function type")
+        | Ptyp_any => fail(ptyp_loc, "Can't generate codecs for `any` type")
+        | Ptyp_package(_)=> fail(ptyp_loc, "Can't generate codecs for module type")
+        | Ptyp_variant(_, _, _) => fail(ptyp_loc, "Unexpected Ptyp_variant")
+        | Ptyp_var(_) => false
+        | Ptyp_tuple(childTypes) =>
+            List.exists(isIdentifierUsedInCoreType(typeName), childTypes)
         | Ptyp_constr({txt}, childTypes) =>
             txt == Lident(typeName)
                 ? true
                 : List.exists(isIdentifierUsedInCoreType(typeName), childTypes)
-        | Ptyp_variant(_, _, _) => failwith("Ptyp_variant")
-        | Ptyp_object(_, _) => failwith("Ptyp_object")
-        | Ptyp_class(_, _) => failwith("Ptyp_class")
-        | Ptyp_alias(_, _) => failwith("Ptyp_alias")
-        | Ptyp_poly(_, _) => failwith("Ptyp_poly")
-        | Ptyp_package(_) => failwith("Ptyp_package")
-        | Ptyp_extension(_) => failwith("Ptyp_extension")
+        | _ => fail(ptyp_loc, "This syntax is not yet handled by decco")
     };
 
 let isRecursive = (typeName, decls) =>
