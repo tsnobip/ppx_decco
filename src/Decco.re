@@ -1,5 +1,7 @@
 open Belt.Result;
 
+type abc = Blah({a:string});
+
 type decodeError = {
     path: string,
     message: string,

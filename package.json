@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build-lib": "bsb -clean-world -make-world",
+    "build-lib": "bsb -verbose -clean-world -make-world",
     "watch": "bsb -clean-world -make-world -w",
     "clean": "rm -rf lib && bsb -clean-world && rm -rf ppx/_esy",
     "build-ppx": "cd ppx && esy",
@@ -31,11 +31,11 @@
   },
   "_": [],
   "peerDependencies": {
-    "bs-platform": "^6.0.0"
+    "bs-platform": "^6.0.1"
   },
   "devDependencies": {
     "@glennsl/bs-jest": "0.4.9",
-    "bs-platform": "^6.0.0",
+    "bs-platform": "^6.0.1",
     "esy": "0.5.8",
     "jest": "^24.9.0"
   }
