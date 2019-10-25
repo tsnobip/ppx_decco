@@ -1,0 +1,2 @@
+* text=auto
+ppx/ppx_decco.sh text eol=lf
